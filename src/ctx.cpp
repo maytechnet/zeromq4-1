@@ -46,12 +46,10 @@
 #include "err.hpp"
 #include "msg.hpp"
 
-#ifdef HAVE_LIBSODIUM
-#ifdef HAVE_TWEETNACL
-#include "randombytes.h"
-#else
-#include "sodium.h"
-#endif
+#if defined (ZMQ_USE_TWEETNACL)
+#   include "randombytes.h"
+#elif defined (ZMQ_USE_LIBSODIUM)
+#   include "sodium.h"
 #endif
 
 #define ZMQ_CTX_TAG_VALUE_GOOD 0xabadcafe
@@ -113,7 +111,7 @@ zmq::ctx_t::~ctx_t ()
 
     //  If we've done any Curve encryption, we may have a file handle
     //  to /dev/urandom open that needs to be cleaned up.
-#ifdef HAVE_LIBSODIUM
+#if defined (ZMQ_USE_TWEETNACL)
     randombytes_close();
 #endif
 
