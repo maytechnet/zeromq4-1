@@ -16,6 +16,7 @@ env:
   - CXXFLAGS=-I${BUILD_PREFIX}/include
   - LDFLAGS=-L${BUILD_PREFIX}/lib
   - PKG_CONFIG_PATH=${BUILD_PREFIX}/lib/pkgconfig
+  - DISTCHECK_CONFIGURE_FLAGS="--with-libsodium --prefix=${BUILD_PREFIX}"
 
 #   Build required projects first
 before_script:
@@ -31,5 +32,20 @@ before_script:
 
 #   Build and check this project
 script:
-- ./autogen.sh && ./configure --prefix=${BUILD_PREFIX} && make && make check
-- make install
+- ./autogen.sh && ./configure --with-libsodium --prefix=${BUILD_PREFIX} && make distcheck
+
+# Deploy tags
+before_deploy:
+- . ./ci_deploy.sh
+deploy:
+  provider: releases
+  api_key:
+    secure: "C+hbVQQL62twHIit4vjExT908acpjQzxPvCgnKKVdEYm58+rXVvQ4HzOlNve7py522m/2iazwnJDX5bPskES5Kof3jqTJ2hZI9rcFXh1KuEjUojiPwix/mUnxFYcxS4PhgmyqG3z5YUsEXnDhwkOwsAVnQIJUFV1XAWMWwDCilI="
+  file_glob: true
+  file: ${ZEROMQ41_DEPLOYMENT}
+  skip_cleanup: true
+  on:
+    repo: zeromq/zeromq4-1
+    branch: master
+    tags: true
+    condition: "$TRAVIS_OS_NAME =~ (linux)"
